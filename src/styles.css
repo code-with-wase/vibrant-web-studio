@@ -177,3 +177,10 @@
 @media(max-width:640px) { .workspace { display:block; } .sidebar { position:relative; height:auto; padding:16px; border-right:0; border-bottom:1px solid var(--border); } .sidebar nav { display:flex; overflow:auto; margin-top:16px; } .nav-item { white-space:nowrap; padding:9px 12px; } .sidebar-bottom { display:none; } .page-main { padding:24px 16px; } .page-top { align-items:flex-start; } .auth-panel { padding:24px; } .dialog-grid { grid-template-columns:1fr; } .stat { padding:18px; } }
 @media print { .sidebar,.page-top,.no-print { display:none!important; } .workspace { display:block; } .page-main { padding:0; } body { background:var(--foreground); color:var(--background); } .data-table th,.data-table td { color:var(--background); } }
 @media print { body:has([role="dialog"]) .workspace { display:none!important; } [data-slot="dialog-overlay"], [data-state="open"][aria-hidden="true"] { display:none!important; } [role="dialog"] { position:static!important; transform:none!important; width:100%!important; max-width:none!important; max-height:none!important; overflow:visible!important; box-shadow:none!important; background:var(--foreground)!important; color:var(--background)!important; border:0!important; } [role="dialog"]>button { display:none!important; } }
+
+/* Slim themed scrollbars */
+* { scrollbar-width: thin; scrollbar-color: color-mix(in oklab, var(--primary) 45%, transparent) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--primary) 45%, transparent); border-radius: 999px; }
+*::-webkit-scrollbar-button { display: none; height: 0; width: 0; }

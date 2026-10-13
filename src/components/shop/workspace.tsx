@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useSuspenseQuery, useQueryClient, useQuery } from '@tanstack/react-query';
-import { useServerFn } from '@tanstack/react-start';
 import { Crown, LayoutDashboard, Package, Tag, Layers, Boxes, ReceiptText, FileText, TriangleAlert, ChartNoAxesCombined, Users, LogOut, Plus, Search, ArrowUpRight, Pencil, Trash2, Printer, X, ShieldCheck, ShoppingBag, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
+import { localDb as supabase } from '@/lib/local-db';
 import { shopQuery, titles, sections, money } from '@/lib/shop';
-import { manageAdmins } from '@/lib/admin.functions';
 import boutique from '@/assets/boutique.jpg';
 const icons=[LayoutDashboard,Package,Tag,Layers,Boxes,ReceiptText,FileText,TriangleAlert,ChartNoAxesCombined,Users];
 export function ShopWorkspace({section,admin,email}:{section:string;admin:boolean;email:string}){
@@ -17,7 +15,7 @@ export function ShopWorkspace({section,admin,email}:{section:string;admin:boolea
 }
 function StoreContent({section}:{section:string}){
  const {data}=useSuspenseQuery(shopQuery);const qc=useQueryClient();const navigate=useNavigate();const [search,setSearch]=useState('');const [filter,setFilter]=useState('');const [dialog,setDialog]=useState<'product'|'brand'|'category'|'stock'|'admin'|null>(null);const [editId,setEditId]=useState<string|null>(null);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const [notice,setNotice]=useState('');const [viewInvoice,setViewInvoice]=useState<string|null>(null);const [invoiceId,setInvoiceId]=useState<string|null>(null);const [cart,setCart]=useState<{product_id:string;name:string;quantity:number;price:number}[]>([]);const [customer,setCustomer]=useState('');const [payment,setPayment]=useState('Cash');const [period,setPeriod]=useState('month');
- const adminFn=useServerFn(manageAdmins);const adminQuery=useQuery({queryKey:['admins'],queryFn:()=>adminFn({data:{}}),enabled:section==='admins'});
+ const adminFn=async({data}:{data:{email?:string;password?:string}})=>supabase.admins(data);const adminQuery=useQuery({queryKey:['admins'],queryFn:()=>adminFn({data:{}}),enabled:section==='admins'});
  const product=data.products.find(p=>p.id===editId);const low=data.products.filter(p=>p.stock<=p.low_stock);const invoices=data.invoices.filter(i=>i.status==='paid');const sales=invoices.reduce((a,i)=>a+Number(i.total),0);const today=new Date().toISOString().slice(0,10);const todaySales=invoices.filter(i=>i.created_at.startsWith(today)).reduce((a,i)=>a+Number(i.total),0);
  async function run(action:()=>Promise<unknown>,msg:string){setBusy(true);setError('');setNotice('');try{await action();await qc.invalidateQueries({queryKey:['shop']});setNotice(msg);setDialog(null);return true;}catch(e){setError(e instanceof Error?e.message:'Something went wrong');return false;}finally{setBusy(false);}}
  function check(r:{error:{message:string}|null}){if(r.error)throw new Error(r.error.message);}
