@@ -182,7 +182,7 @@
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }
 /* Workspace fits the screen: sidebar fixed, only content area scrolls */
-@media (min-width: 641px) { .workspace { height: 100svh; overflow: hidden; } .sidebar { overflow-y: auto; } .workspace > main { height: 100svh; overflow-y: auto; } }
+@media screen and (min-width: 641px) { .workspace { height: 100svh; overflow: hidden; } .sidebar { overflow-y: auto; } .workspace > main { height: 100svh; overflow-y: auto; } }
 /* Invoice print sheet (only visible while printing an invoice) */
 .invoice-print { display: none; }
 @media print {
