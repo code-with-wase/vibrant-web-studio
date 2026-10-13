@@ -218,8 +218,8 @@
   .data-table tbody tr { transition: background-color 160ms ease; }
   .data-table tbody tr:hover { background: color-mix(in oklch, var(--accent) 45%, transparent); }
   .field { transition: border-color 180ms ease, outline-color 180ms ease; }
-  [data-slot="button"] { transition: background-color 180ms ease, color 180ms ease, transform 120ms ease; }
-  [data-slot="button"]:active:not(:disabled) { transform: translateY(1px); }
+  button { transition: background-color 180ms ease, color 180ms ease, transform 120ms ease; }
+  button:active:not(:disabled) { transform: translateY(1px); }
   [role="status"], [role="alert"] { animation: dc-enter 220ms ease-out both; }
 }
 @media (prefers-reduced-motion: reduce) {
