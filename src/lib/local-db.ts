@@ -2,7 +2,7 @@
 // backend client API that the app uses, so a real backend can be swapped back in later.
 export type Brand = { id: string; name: string };
 export type Product = { id: string; name: string; sku: string; size: string; color: string; price: number; low_stock: number; stock: number; brand_id: string | null; category_id: string | null; created_at: string };
-export type InvoiceItem = { id: string; invoice_id: string; product_id: string; name: string; quantity: number; price: number };
+export type InvoiceItem = { id: string; invoice_id: string; product_id: string; name: string; quantity: number; price: number; brand?: string; size?: string; color?: string };
 export type Invoice = { id: string; number: number; customer: string; payment: string; status: string; total: number; created_at: string };
 export type Movement = { id: string; product_id: string | null; product_name: string; change: number; note: string; created_at: string };
 export type Admin = { id: string; email: string; password: string; created_at: string };
@@ -52,7 +52,7 @@ async function rpc(fn: string, a: RpcArgs): Promise<Res<unknown>> {
     p.stock += change; db.stock_movements.unshift({ id: uid(), product_id: p.id, product_name: p.name, change, note: String(a.p_note || 'Manual adjustment'), created_at: now() }); save(db); return ok(null);
   }
   if (fn === 'save_invoice') {
-    const items = a.p_items as { product_id: string; name: string; quantity: number; price: number }[];
+    const items = a.p_items as { product_id: string; name: string; quantity: number; price: number; brand?: string; size?: string; color?: string }[];
     if (!items.length) return fail('Add at least one product');
     const existing = a.p_id ? db.invoices.find(i => i.id === a.p_id) : undefined;
     const restore = existing ? db.invoice_items.filter(i => i.invoice_id === existing.id) : [];
