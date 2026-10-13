@@ -105,6 +105,6 @@ export const localDb = {
     async signOut() { const db = load(); db.session = null; save(db); emit('SIGNED_OUT'); return { error: null }; },
     async resetPasswordForEmail(_email: string, _o?: unknown) { return { error: new Error('Password reset by email will work once the backend is connected. Use the test admin login for now.') }; },
     async updateUser(_o: { password: string }) { return { error: { message: 'Password reset will work once the backend is connected.' } }; },
-    onAuthStateChange(cb: Listener) { listeners.add(cb); return { data: { subscription: { unsubscribe: () => listeners.delete(cb) } } }; },
+    onAuthStateChange(cb: Listener) { listeners.add(cb); return { data: { subscription: { unsubscribe: () => { listeners.delete(cb); } } } }; },
   },
 };
