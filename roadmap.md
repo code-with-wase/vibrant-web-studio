@@ -7,3 +7,6 @@
 - [ ] Vercel deployment verification — blocked: external hosting credentials and deployment not supplied.
 - [x] Replace default browser icons and shop logo with DC branding.
 - [ ] Hide the hosted platform badge — blocked: requires an editor role on a Pro plan or higher.
+
+- [ ] Connect backend email password recovery and verify recovery states.
+- [ ] Add restrained portal motion with reduced-motion support.
