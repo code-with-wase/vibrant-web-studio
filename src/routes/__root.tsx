@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { localDb as supabase } from '@/lib/local-db';
+import { localDb as db } from '@/lib/local-db';
 
 function NotFoundComponent() {
   return (
@@ -120,7 +120,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange(event => {
+    const { data } = db.auth.onAuthStateChange(event => {
       if (event !== 'SIGNED_IN' && event !== 'SIGNED_OUT' && event !== 'USER_UPDATED') return;
       void router.invalidate();
       if (event !== 'SIGNED_OUT') void queryClient.invalidateQueries();
