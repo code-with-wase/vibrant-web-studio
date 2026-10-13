@@ -27,7 +27,7 @@ async function request<T>(path: string, init: { method?: string; body?: unknown;
     res = await fetch(`${API_URL}${path}${qs ? `?${qs}` : ''}`, {
       method: init.method ?? 'GET',
       headers: { ...(init.body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
+      body: init.body !== undefined ? JSON.stringify(init.body) : null,
     });
   } catch {
     throw new Error('Cannot reach the server. Check your internet connection.');
@@ -61,7 +61,7 @@ export const api = {
   report: (q: { from?: string; to?: string; period: string }) => request<SalesReport>('/report/sales', { query: q }),
   // Stock
   movements: (limit = 50) => request<Movement[]>('/stock/movements', { query: { limit: String(limit) } }),
-  adjustStock: (b: { product_id: string; change: number; note?: string }) => request('/stock/adjust', { method: 'POST', body: b }),
+  adjustStock: (b: { product_id: string; change: number; note?: string | undefined }) => request('/stock/adjust', { method: 'POST', body: b }),
   // Invoices
   invoices: () => request<Invoice[]>('/invoice/all'),
   getInvoice: (id: string) => request<Invoice>(`/invoice/${id}`),
@@ -69,7 +69,7 @@ export const api = {
     id ? request<Invoice>(`/invoice/${id}/update`, { method: 'PUT', body: b }) : request<Invoice>('/invoice/create', { method: 'POST', body: b }),
   cancelInvoice: (id: string, del = false) => request(`/invoice/${id}/cancel`, { method: 'POST', body: { delete: del } }),
   // Kept for existing call sites
-  rpc: (fn: string, a: { _user_id?: string; p_id?: string; p_change?: number; p_note?: string; p_items?: { product_id: string; quantity: number; price: number }[]; p_customer?: string; p_payment?: string; p_delete?: boolean }) => {
+  rpc: (fn: string, a: { _user_id?: string; _role?: string; p_id?: string; p_change?: number; p_note?: string; p_items?: { product_id: string; quantity: number; price: number }[]; p_customer?: string; p_payment?: string; p_delete?: boolean }) => {
     if (fn === 'adjust_stock') return wrap(api.adjustStock({ product_id: a.p_id!, change: Number(a.p_change), note: a.p_note }));
     if (fn === 'save_invoice') return wrap(api.saveInvoice({ customer: a.p_customer ?? '', payment: a.p_payment ?? 'Cash', items: (a.p_items ?? []).map(i => ({ product_id: i.product_id, quantity: i.quantity, price: i.price })) }, a.p_id));
     if (fn === 'cancel_invoice') return wrap(api.cancelInvoice(a.p_id!, a.p_delete));
