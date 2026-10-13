@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Crown, ArrowRight, LockKeyhole, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
+import { localDb as supabase } from '@/lib/local-db';
 import boutique from '@/assets/boutique.jpg';
 export const Route = createFileRoute('/')({ head: () => ({ meta: [{title:'Admin Login | Deluxe Culture'},{name:'description',content:'Secure admin access for Deluxe Culture menswear.'},{property:'og:title',content:'Deluxe Culture | Admin Login'},{property:'og:description',content:'Secure store management access.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}] }), component: Login });
 function Login() {
