@@ -1,24 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
-});
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { Crown, ArrowRight, LockKeyhole, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import boutique from '@/assets/boutique.jpg';
+export const Route = createFileRoute('/')({ head: () => ({ meta: [{title:'Admin Login | Deluxe Culture'},{name:'description',content:'Secure admin access for Deluxe Culture menswear.'},{property:'og:title',content:'Deluxe Culture | Admin Login'},{property:'og:description',content:'Secure store management access.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}] }), component: Login });
+function Login() {
+ const navigate = Route.useNavigate(); const [email,setEmail]=useState(''); const [password,setPassword]=useState(''); const [show,setShow]=useState(false); const [busy,setBusy]=useState(false); const [error,setError]=useState(''); const [forgot,setForgot]=useState(false); const [sent,setSent]=useState(false);
+ useEffect(()=>{ void supabase.auth.getUser().then(({data})=>{if(data.user) void navigate({to:'/$section',params:{section:'dashboard'}});}); },[navigate]);
+ async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);setError(''); try { if(forgot){ const r=await supabase.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/reset-password'});if(r.error)throw r.error;setSent(true); } else {const r=await supabase.auth.signInWithPassword({email,password});if(r.error)throw r.error; await navigate({to:'/$section',params:{section:'dashboard'}});}} catch(err){setError(err instanceof Error?err.message:'Sign in failed');}finally{setBusy(false);} }
+ return <main className="auth-scene"><img className="auth-photo" src={boutique} width={1536} height={1024} alt="Black and gold menswear boutique"/><div className="auth-shade"/><div className="auth-content"><div className="text-center mb-9"><Crown className="mx-auto text-primary mb-2" size={32}/><h1 className="brand-type text-primary text-4xl font-semibold">DELUXE CULTURE</h1><div className="text-xs text-muted-foreground mt-2 tracking-[0.3em]">MEN’S WEAR</div></div><section className="auth-panel"><div className="flex items-center gap-2 text-primary text-xs mb-5"><LockKeyhole size={14}/> ADMIN ACCESS</div><h2 className="text-2xl font-semibold">{forgot?'Reset your password':'Welcome back'}</h2><p className="text-muted-foreground text-sm mt-2 mb-7">{forgot?'Enter your account email.':'Sign in to your store.'}</p>{sent?<p className="text-primary py-6">Check your email for a password reset link.</p>:<form onSubmit={submit} className="space-y-5"><label className="field-label">Email address<input className="field" type="email" autoComplete="username" required placeholder="you@example.com" value={email} onChange={e=>setEmail(e.target.value)}/></label>{!forgot&&<label className="field-label">Password<div className="relative"><input className="field pr-12" type={show?'text':'password'} autoComplete="current-password" placeholder="Enter your password" required value={password} onChange={e=>setPassword(e.target.value)}/><Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1" aria-label={show?'Hide password':'Show password'} onClick={()=>setShow(!show)}>{show?<EyeOff/>:<Eye/>}</Button></div></label>}{error&&<p role="alert" className="text-destructive text-sm">{error}</p>}{!forgot&&<div className="text-right"><Button type="button" variant="link" className="p-0 h-auto text-xs" onClick={()=>setForgot(true)}>Forgot password?</Button></div>}<Button className="w-full h-11" disabled={busy}>{busy?'Please wait…':forgot?'Send reset link':'Sign in'}<ArrowRight/></Button></form>}{forgot&&<Button variant="link" className="w-full mt-4" onClick={()=>{setForgot(false);setSent(false);}}>Back to sign in</Button>}<div className="flex items-center justify-center gap-2 mt-7 text-muted-foreground text-xs"><ShieldCheck size={14}/> Secure, admin-only access</div></section><div className="text-center text-xs text-muted-foreground mt-7">DELUXE CULTURE · STORE MANAGEMENT</div></div></main>;
 }
