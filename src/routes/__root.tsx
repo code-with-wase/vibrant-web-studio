@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { localDb as db } from '@/lib/local-db';
+import { api as db } from '@/lib/api';
 
 function NotFoundComponent() {
   return (

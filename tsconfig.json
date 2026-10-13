@@ -1,4 +1,5 @@
 {
+  "exclude": ["src/integrations"],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
