@@ -19,9 +19,9 @@ type Listener = (event: 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED') => void;
 const listeners = new Set<Listener>();
 const emit = (e: Parameters<Listener>[0]) => listeners.forEach(l => l(e));
 
-async function request<T>(path: string, init: { method?: string; body?: unknown; query?: Record<string, string | undefined> } = {}): Promise<T> {
+async function request<T>(path: string, init: { method?: string; body?: unknown; query?: Record<string, string | undefined>; public?: boolean } = {}): Promise<T> {
   const qs = init.query ? Object.entries(init.query).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v!)}`).join('&') : '';
-  const token = getToken();
+  const token = init.public ? null : getToken();
   let res: Response;
   try {
     res = await fetch(`${API_URL}${path}${qs ? `?${qs}` : ''}`, {
@@ -93,7 +93,8 @@ export const api = {
     },
     async signOut() { try { if (getToken()) await request('/auth/logout', { method: 'POST' }); } catch { /* ignore */ } localStorage.removeItem(TOKEN_KEY); emit('SIGNED_OUT'); return { error: null }; },
     async updatePassword(b: { currentPassword: string; newPassword: string }) { await request('/auth/password/update', { method: 'PATCH', body: b }); emit('USER_UPDATED'); },
-    async resetPasswordForEmail(_email: string, _o?: unknown) { return { error: new Error('Password reset by email is not available. Ask another administrator, or sign in and use “Change password”.') }; },
+    resetPasswordForEmail(email: string) { return wrap(request<{ message: string }>('/auth/password/forgot', { method: 'POST', body: { email: email.trim() }, public: true })); },
+    resetPassword(b: { email: string; token: string; newPassword: string }) { return wrap(request<{ message: string }>('/auth/password/reset', { method: 'POST', body: b, public: true })); },
     async updateUser(_o: { password: string }) { return { error: { message: 'Sign in and use “Change password” in Administrators.' } }; },
     onAuthStateChange(cb: Listener) { listeners.add(cb); return { data: { subscription: { unsubscribe: () => { listeners.delete(cb); } } } }; },
   },
