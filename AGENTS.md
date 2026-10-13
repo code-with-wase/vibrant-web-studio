@@ -15,3 +15,5 @@
 - Use a shared authenticated workspace with named section URLs; public sign-in and recovery remain outside the gate.
 - Select the Vercel Nitro target only on Vercel to preserve Lovable's preview and publishing target.
 - Shop data and admin login currently live in browser storage (src/lib/local-db.ts) because the owner asked for frontend-only until they connect a backend.
+
+- Reuse the shared shop logo asset in login and workspace branding, and derive public browser icons from it so the identity remains consistent.
