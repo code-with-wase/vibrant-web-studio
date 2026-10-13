@@ -5,7 +5,7 @@ import { useSuspenseQuery, useQueryClient, useQuery } from '@tanstack/react-quer
 import { LayoutDashboard, Package, Tag, Layers, Boxes, ReceiptText, FileText, TriangleAlert, ChartNoAxesCombined, Users, LogOut, Plus, Search, ArrowUpRight, Pencil, Trash2, Printer, X, ShieldCheck, ShoppingBag, IndianRupee } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { localDb as db } from '@/lib/local-db';
+import { api as db } from '@/lib/api';
 import { shopQuery, titles, sections, money } from '@/lib/shop';
 import boutique from '@/assets/boutique.jpg';
 import dcLogo from '@/assets/dc-logo.jpg';
