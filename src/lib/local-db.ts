@@ -33,8 +33,8 @@ const fail = (message: string): Res<null> => ({ data: null, error: { message } }
 type Table = 'products' | 'brands' | 'categories';
 function table(name: Table) {
   return {
-    insert: async (row: Record<string, unknown>) => { const db = load(); const list = db[name] as unknown as Record<string, unknown>[]; if (name !== 'products' && list.some(r => String(r.name).toLowerCase() === String(row.name).toLowerCase())) return fail('This name already exists'); if (name === 'products' && list.some(r => r.sku === row.sku)) return fail('SKU already exists'); list.push({ ...row, id: uid(), created_at: now() }); save(db); return ok(null); },
-    update: (row: Record<string, unknown>) => ({ eq: async (_c: 'id', id: string) => { const db = load(); const list = db[name] as unknown as Record<string, unknown>[]; const i = list.findIndex(r => r.id === id); if (i < 0) return fail('Not found'); list[i] = { ...list[i], ...row }; save(db); return ok(null); } }),
+    insert: async (row: Partial<Product>) => { const db = load(); const list = db[name] as unknown as Partial<Product>[]; if (name !== 'products' && list.some(r => String(r.name).toLowerCase() === String(row.name).toLowerCase())) return fail('This name already exists'); if (name === 'products' && list.some(r => r.sku === row.sku)) return fail('SKU already exists'); list.push({ ...row, id: uid(), created_at: now() } as Partial<Product>); save(db); return ok(null); },
+    update: (row: Partial<Product>) => ({ eq: async (_c: 'id', id: string) => { const db = load(); const list = db[name] as unknown as Partial<Product>[]; const i = list.findIndex(r => r.id === id); if (i < 0) return fail('Not found'); list[i] = { ...list[i], ...row }; save(db); return ok(null); } }),
     delete: () => ({ eq: async (_c: 'id', id: string) => { const db = load(); (db as unknown as Record<Table, { id: string }[]>)[name] = db[name].filter(r => r.id !== id); if (name !== 'products') for (const p of db.products) { if (name === 'brands' && p.brand_id === id) p.brand_id = null; if (name === 'categories' && p.category_id === id) p.category_id = null; } save(db); return ok(null); } }),
   };
 }
@@ -42,7 +42,8 @@ type Listener = (event: 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED') => void;
 const listeners = new Set<Listener>();
 const emit = (e: Parameters<Listener>[0]) => listeners.forEach(l => l(e));
 
-async function rpc(fn: string, a: Record<string, unknown>): Promise<Res<unknown>> {
+type RpcArgs = { _user_id?: string; _role?: string; p_id?: string; p_change?: number; p_note?: string; p_items?: unknown; p_customer?: string; p_payment?: string; p_delete?: boolean };
+async function rpc(fn: string, a: RpcArgs): Promise<Res<unknown>> {
   const db = load();
   if (fn === 'has_role') return ok(db.admins.some(x => x.id === a._user_id));
   if (fn === 'adjust_stock') {
