@@ -8,5 +8,6 @@
 - [x] Replace default browser icons and shop logo with DC branding.
 - [ ] Hide the hosted platform badge — blocked: requires an editor role on a Pro plan or higher.
 
-- [ ] Connect backend email password recovery and verify recovery states.
-- [ ] Add restrained portal motion with reduced-motion support.
+- [x] Connect backend email password recovery; verify invalid links, mismatch, and simulated success.
+- [ ] Verify real email delivery and successful recovery — blocked: external backend reports "Password reset email is not configured"; SMTP and HTTPS RESET_PASSWORD_URL must be configured by backend owner.
+- [x] Add restrained portal motion with reduced-motion support.
