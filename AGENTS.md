@@ -18,5 +18,4 @@
 
 - Reuse the shared shop logo asset in login and workspace branding, and derive public browser icons from it so the identity remains consistent.
 
-- Email recovery uses the external API public forgot/reset endpoints and query-string email/token links; keep it independent of signed-in sessions so expired sessions cannot block recovery.
 - Portal motion is CSS-only and disabled for reduced-motion preferences and print; keep animations short and avoid layout shifts during shop tasks.
