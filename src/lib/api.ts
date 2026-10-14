@@ -93,9 +93,6 @@ export const api = {
     },
     async signOut() { try { if (getToken()) await request('/auth/logout', { method: 'POST' }); } catch { /* ignore */ } localStorage.removeItem(TOKEN_KEY); emit('SIGNED_OUT'); return { error: null }; },
     async updatePassword(b: { currentPassword: string; newPassword: string }) { await request('/auth/password/update', { method: 'PATCH', body: b }); emit('USER_UPDATED'); },
-    resetPasswordForEmail(email: string) { return wrap(request<{ message: string }>('/auth/password/forgot', { method: 'POST', body: { email: email.trim() }, public: true })); },
-    resetPassword(b: { email: string; token: string; newPassword: string }) { return wrap(request<{ message: string }>('/auth/password/reset', { method: 'POST', body: b, public: true })); },
-    async updateUser(_o: { password: string }) { return { error: { message: 'Sign in and use “Change password” in Administrators.' } }; },
     onAuthStateChange(cb: Listener) { listeners.add(cb); return { data: { subscription: { unsubscribe: () => { listeners.delete(cb); } } } }; },
   },
 };
