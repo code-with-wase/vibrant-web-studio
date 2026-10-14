@@ -225,3 +225,10 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  tbody tr { animation: dc-row-in 220ms ease-out both; }
+  @keyframes dc-row-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  [data-slot="button"]:active { transform: scale(0.97); }
+}
+@media print { tbody tr { animation: none !important; } }
