@@ -1,17 +1,34 @@
-import { QueryClient } from "@tanstack/react-query";
-import { createRouter, rootRouteId } from "@tanstack/react-router";
+import { matchRoutes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
+import { router } from "@/router";
 
-import { routeTree } from "@/routeTree.gen";
+describe("Hash-routed app pages", () => {
+  it("routes the login page at the root", () => {
+    const matches = matchRoutes(router.routes, "/");
 
-// Match routes without running loaders or rendering: loaders may need a server or
-// network the test run lacks, and jsdom never loads the stylesheets React waits on.
-describe("App routing", () => {
-  it("matches a page for / instead of falling back to not found", () => {
-    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    expect(matches?.at(-1)?.route.index).toBe(true);
+  });
 
-    const matches = router.matchRoutes("/");
+  it.each([
+    "dashboard",
+    "products",
+    "brands",
+    "categories",
+    "billing",
+    "invoices",
+    "low-stock",
+    "reports",
+    "admins",
+  ])("matches the workspace section /%s under the app shell", (section) => {
+    const matches = matchRoutes(router.routes, `/${section}`);
 
-    expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
+    expect(matches?.map((match) => match.route.path)).toEqual(["/", ":section"]);
+  });
+
+  it("matches unknown application paths to the not-found page", () => {
+    const matches = matchRoutes(router.routes, "/not-a-section");
+
+    expect(matches?.at(-1)?.route.path).toBe(":section");
+    expect(matches?.at(-1)?.route.loader).toBeTypeOf("function");
   });
 });

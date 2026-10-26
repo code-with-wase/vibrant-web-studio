@@ -9,12 +9,11 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Keep TanStack Start routing and server functions alongside React/Vite/Tailwind because secure admin operations require the existing server boundary.
-- Keep admin permissions in user_roles and verify them before privileged account creation; ordinary shop access uses role-scoped RLS.
-- Invoice writes and stock changes use transactional database functions so edits and cancellation cannot desynchronize inventory.
-- Use a shared authenticated workspace with named section URLs; public sign-in and recovery remain outside the gate.
-- Select the Vercel Nitro target only on Vercel to preserve Lovable's preview and publishing target.
-- All shop data and admin auth go through the external DC Management Express API via src/lib/api.ts (JWT in localStorage) because the owner hosts their own backend.
+- Keep the frontend as React + Vite with React Router Hash Routing; shop data and admin authentication go through `src/lib/api.ts` to the hosted DC Management Express API.
+- Keep admin authorization, account creation, invoice writes, and stock changes enforced by the hosted backend; never move privileged operations or secrets into the frontend.
+- Keep the shared authenticated workspace and its named section URLs; public sign-in remains outside the authenticated route loader.
+- Keep Vercel deployment static (`dist`) and use npm; do not reintroduce TanStack Start or Nitro.
+- Keep Electron Builder configuration and the hardened Electron main process in `winrap`; the packaged app origin is `dcstore://app` and must be allowlisted by the hosted API's CORS policy.
 
 - Reuse the shared shop logo asset in login and workspace branding, and derive public browser icons from it so the identity remains consistent.
 

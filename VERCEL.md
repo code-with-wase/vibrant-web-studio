@@ -1,8 +1,12 @@
 # Vercel deployment
 
-This app uses React, Vite and Tailwind with TanStack Start for secure server functions. It is not a static SPA: do not add a catch-all rewrite to index.html.
+This is a static React + Vite application. Vercel installs with `npm ci`, runs
+`npm run build`, and publishes `dist/` as configured in `vercel.json`. Hash
+routes (for example `/#/invoices`) are handled by React Router in the browser;
+no server rewrite or Nitro function is required.
 
-Import the repository into Vercel. The Vercel-specific Nitro preset is selected when VERCEL is set by Vercel; Lovable preview and publishing retain their existing target.
-
-
-Add the deployed origin and /reset-password callback to the auth redirect allow-list. Vercel deployment and external credentials have not been verified by this change.
+Set `VITE_API_URL` to the hosted DC Management Express API URL when it differs
+from the default. Configure that backend to allow the deployed site's origin
+and its `Authorization` and `Content-Type` preflight headers. Deployment and
+the external backend's CORS settings must be verified in their respective
+hosting accounts.

@@ -1,16 +1,46 @@
-import { QueryClient } from "@tanstack/react-query";
-import { createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { createHashRouter, redirect, type LoaderFunctionArgs } from "react-router-dom";
+import { api as db } from "@/lib/api";
+import { queryClient } from "@/lib/query-client";
+import { dashboardQuery, sections, shopQuery } from "@/lib/shop";
+import {
+  NotFoundPage,
+  RootLayout,
+  RouteErrorPage,
+  WorkspaceRoute,
+  type AdminAccess,
+} from "@/routes/app-shell";
+import { LoginPage } from "@/routes/index";
 
-export const getRouter = () => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, gcTime: 10 * 60_000, refetchOnWindowFocus: false, retry: 1, placeholderData: (prev: unknown) => prev } } });
+async function loadWorkspace({ params }: LoaderFunctionArgs): Promise<AdminAccess> {
+  if (!sections.some((section) => section === params["section"])) {
+    throw new Response("Not Found", { status: 404, statusText: "Not Found" });
+  }
 
-  const router = createRouter({
-    routeTree,
-    context: { queryClient },
-    scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
-  });
+  const { data, error } = await db.auth.getUser();
+  if (error || !data.user) throw redirect("/");
 
-  return router;
-};
+  const admin = data.user.role === "admin";
+  if (admin) {
+    void queryClient.prefetchQuery(shopQuery);
+    void queryClient.prefetchQuery(dashboardQuery);
+  }
+
+  return { admin, email: data.user.email ?? "" };
+}
+
+export const router = createHashRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    errorElement: <RouteErrorPage />,
+    children: [
+      { index: true, element: <LoginPage /> },
+      {
+        path: ":section",
+        loader: loadWorkspace,
+        element: <WorkspaceRoute />,
+      },
+      { path: "*", element: <NotFoundPage /> },
+    ],
+  },
+]);

@@ -1,5 +1,0 @@
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { shopQuery, sections, titles } from '@/lib/shop';
-import { ShopWorkspace } from '@/components/shop/workspace';
-export const Route=createFileRoute('/_authenticated/$section')({loader:async({params,context})=>{if(!sections.some(s=>s===params.section))throw notFound();if(context.admin)await context.queryClient.ensureQueryData(shopQuery);},head:({params})=>({meta:[{title:`${titles[params.section]??'Store'} | Deluxe Culture`},{name:'description',content:`Deluxe Culture ${titles[params.section]??'store management'}.`},{property:'og:title',content:`Deluxe Culture | ${titles[params.section]??'Store'}`},{property:'og:description',content:'Private menswear store management.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary_large_image'}]}),component:Page});
-function Page(){const {section}=Route.useParams();const {admin,email}=Route.useRouteContext();return <ShopWorkspace section={section} admin={admin} email={email}/>}

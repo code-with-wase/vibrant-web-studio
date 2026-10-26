@@ -9,14 +9,11 @@ lerna-debug.log*
 
 node_modules
 dist
-dist-ssr
+release
 .output
-.vinxi
-.tanstack/**
-.nitro
 *.local
 
-# Wrangler / Cloudflare
+# Local Wrangler state
 .wrangler/
 .dev.vars
 

@@ -1,0 +1,18 @@
+appId: com.deluxeculture.store
+productName: Deluxe Culture Store
+directories:
+  output: release
+files:
+  - dist/**/*
+  - public/favicon.ico
+  - winrap/main.cjs
+  - package.json
+asar: true
+win:
+  target: nsis
+  icon: public/favicon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true

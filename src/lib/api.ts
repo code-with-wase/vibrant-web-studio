@@ -15,6 +15,15 @@ export type Dashboard = { todaySales: number; totalProducts: number; unitsInStoc
 export type SalesReport = { from: string; to: string; period: string; sales: number; paidInvoices: number; cancelledInvoices: number; revenue: { period: string; count: number; total: number }[]; products: { name: string; quantity: number; total: number }[] };
 
 const getToken = () => (typeof window === 'undefined' ? null : localStorage.getItem(TOKEN_KEY));
+let cachedUser: { user: User; token: string; expiresAt: number } | null = null;
+let pendingUser: { token: string; promise: Promise<User | null> } | null = null;
+const AUTH_CACHE_MS = 60_000;
+
+function clearCachedUser() {
+  cachedUser = null;
+  pendingUser = null;
+}
+
 type Listener = (event: 'SIGNED_IN' | 'SIGNED_OUT' | 'USER_UPDATED') => void;
 const listeners = new Set<Listener>();
 const emit = (e: Parameters<Listener>[0]) => listeners.forEach(l => l(e));
@@ -34,7 +43,7 @@ async function request<T>(path: string, init: { method?: string; body?: unknown;
   }
   const json = (await res.json().catch(() => ({}))) as { data?: T; error?: { message?: string } };
   if (!res.ok) {
-    if (res.status === 401 && token && !path.startsWith('/auth/login')) { localStorage.removeItem(TOKEN_KEY); emit('SIGNED_OUT'); }
+    if (res.status === 401 && token && !path.startsWith('/auth/login')) { clearCachedUser(); localStorage.removeItem(TOKEN_KEY); emit('SIGNED_OUT'); }
     throw new Error(json.error?.message || `Request failed (${res.status})`);
   }
   return json.data as T;
@@ -84,14 +93,35 @@ export const api = {
   // Auth
   auth: {
     async getUser() {
-      if (!getToken()) return { data: { user: null }, error: null };
-      try { const u = await request<User>('/auth/me'); return { data: { user: u }, error: null }; } catch { return { data: { user: null }, error: null }; }
+      const token = getToken();
+      if (!token) {
+        clearCachedUser();
+        return { data: { user: null }, error: null };
+      }
+      if (cachedUser && cachedUser.token === token && cachedUser.expiresAt > Date.now()) {
+        return { data: { user: cachedUser.user }, error: null };
+      }
+      if (!pendingUser || pendingUser.token !== token) {
+        const promise = request<User>('/auth/me')
+          .then((user) => {
+            if (getToken() === token) {
+              cachedUser = { user, token, expiresAt: Date.now() + AUTH_CACHE_MS };
+            }
+            return user;
+          })
+          .catch(() => null)
+          .finally(() => {
+            if (pendingUser?.promise === promise) pendingUser = null;
+          });
+        pendingUser = { token, promise };
+      }
+      return { data: { user: await pendingUser.promise }, error: null };
     },
     async signInWithPassword({ email, password }: { email: string; password: string }) {
-      try { const r = await request<{ token: string; user: User }>('/auth/login', { method: 'POST', body: { email, password } }); localStorage.setItem(TOKEN_KEY, r.token); emit('SIGNED_IN'); return { error: null }; }
+      try { const r = await request<{ token: string; user: User }>('/auth/login', { method: 'POST', body: { email, password } }); localStorage.setItem(TOKEN_KEY, r.token); cachedUser = { user: r.user, token: r.token, expiresAt: Date.now() + AUTH_CACHE_MS }; pendingUser = null; emit('SIGNED_IN'); return { error: null }; }
       catch (e) { return { error: e instanceof Error ? e : new Error('Sign in failed') }; }
     },
-    async signOut() { try { if (getToken()) await request('/auth/logout', { method: 'POST' }); } catch { /* ignore */ } localStorage.removeItem(TOKEN_KEY); emit('SIGNED_OUT'); return { error: null }; },
+    async signOut() { try { if (getToken()) await request('/auth/logout', { method: 'POST' }); } catch { /* ignore */ } clearCachedUser(); localStorage.removeItem(TOKEN_KEY); emit('SIGNED_OUT'); return { error: null }; },
     async updatePassword(b: { currentPassword: string; newPassword: string }) { await request('/auth/password/update', { method: 'PATCH', body: b }); emit('USER_UPDATED'); },
     onAuthStateChange(cb: Listener) { listeners.add(cb); return { data: { subscription: { unsubscribe: () => { listeners.delete(cb); } } } }; },
   },
