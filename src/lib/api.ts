@@ -4,7 +4,7 @@ export const API_URL = ((import.meta.env['VITE_API_URL'] as string | undefined) 
 const TOKEN_KEY = 'dc-token';
 
 export type Named = { id: string; name: string };
-export type Product = { id: string; name: string; sku: string; size: string; color: string; price: number; low_stock: number; stock: number; brand_id: string | null; category_id: string | null; created_at: string; brands: { name: string } | null; categories: { name: string } | null };
+export type Product = { id: string; name: string; sku: string; size: string; color: string; price: number; cost_price?: number | null; low_stock: number; stock: number; brand_id: string | null; category_id: string | null; created_at: string; brands: { name: string } | null; categories: { name: string } | null };
 export type InvoiceItem = { id: string; product_id: string; name: string; quantity: number; price: number; brand?: string; size?: string; color?: string };
 export type Invoice = { id: string; number: number; customer: string; payment: string; status: string; total: number; created_at: string; invoice_items: InvoiceItem[] };
 export type Movement = { id: string; product_id: string | null; product_name: string; change: number; note: string; created_at: string };
@@ -12,7 +12,7 @@ export type Admin = { id: string; email: string; role: string; created_at: strin
 export type User = { id: string; email: string; role: string; created_at?: string };
 export type ShopData = { products: Product[]; brands: Named[]; categories: Named[]; invoices: Invoice[]; movements: Movement[] };
 export type Dashboard = { todaySales: number; totalProducts: number; unitsInStock: number; totalInvoices: number; paidInvoices: number; lowStockCount: number; lowStockProducts: Product[]; recentInvoices: Invoice[] };
-export type SalesReport = { from: string; to: string; period: string; sales: number; paidInvoices: number; cancelledInvoices: number; revenue: { period: string; count: number; total: number }[]; products: { name: string; quantity: number; total: number }[] };
+export type SalesReport = { from: string; to: string; period: string; sales: number; paidInvoices: number; cancelledInvoices: number; costOfGoodsSold?: number; grossProfit?: number | null; untrackedCostQuantity?: number; revenue: { period: string; count: number; total: number }[]; products: { name: string; quantity: number; total: number }[] };
 
 const getToken = () => (typeof window === 'undefined' ? null : localStorage.getItem(TOKEN_KEY));
 let cachedUser: { user: User; token: string; expiresAt: number } | null = null;
